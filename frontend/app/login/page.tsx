@@ -12,6 +12,7 @@ const LoginPage = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   
   const router = useRouter();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL; // Ensure API URL is set in .env.local
 
   // Email validation function
   const validateEmail = (email: string) => {
@@ -29,25 +30,45 @@ const LoginPage = () => {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const password = e.target.value;
     setPassword(password);
-    setIsPasswordValid(password.length >= 6); // example: password should be at least 6 characters
+    setIsPasswordValid(password.length >= 6);
   };
 
   // Check if the form is valid
   useEffect(() => {
-    if (isEmailValid && isPasswordValid) {
-      setIsFormValid(true);
-    } else {
-      setIsFormValid(false);
-    }
+    setIsFormValid(isEmailValid && isPasswordValid);
   }, [isEmailValid, isPasswordValid]);
 
-  const handleLogin = () => {
-    // Handle login logic here, e.g., making API requests
-    console.log('Logging in...');
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form reload
+
+    if (!isFormValid) return; // Stop if form is invalid
+
+    try {
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Login successful:', data);
+        router.push('/dashboard'); // Redirect on success
+      } else {
+        console.error('Login failed:', data.message);
+        alert(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Something went wrong. Please try again.');
+    }
   };
 
   const handleRegister = () => {
-    // Navigate to register page
     router.push('/register');
   };
 
@@ -64,36 +85,43 @@ const LoginPage = () => {
     >
       <Typography variant="h5" align="center">Login</Typography>
 
-      <TextField
-        label="Email"
-        type="email"
-        fullWidth
-        value={email}
-        onChange={handleEmailChange}
-        error={!isEmailValid && email.length > 0}
-        helperText={!isEmailValid && email.length > 0 ? 'Enter a valid email' : ''}
-        variant="outlined"
-      />
+      {/* Form Element */}
+      <form onSubmit={handleSubmit} noValidate>
+        <TextField
+          label="Email"
+          type="email"
+          fullWidth
+          value={email}
+          onChange={handleEmailChange}
+          error={!isEmailValid && email.length > 0}
+          helperText={!isEmailValid && email.length > 0 ? 'Enter a valid email' : ''}
+          variant="outlined"
+          required
+        />
 
-      <TextField
-        label="Password"
-        type="password"
-        fullWidth
-        value={password}
-        onChange={handlePasswordChange}
-        error={!isPasswordValid && password.length > 0}
-        helperText={!isPasswordValid && password.length > 0 ? 'Password must be at least 6 characters' : ''}
-        variant="outlined"
-      />
+        <TextField
+          label="Password"
+          type="password"
+          fullWidth
+          value={password}
+          onChange={handlePasswordChange}
+          error={!isPasswordValid && password.length > 0}
+          helperText={!isPasswordValid && password.length > 0 ? 'Password must be at least 6 characters' : ''}
+          variant="outlined"
+          required
+        />
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleLogin}
-        disabled={!isFormValid}
-      >
-        Login
-      </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={!isFormValid}
+          sx={{ mt: 2 }}
+        >
+          Login
+        </Button>
+      </form>
 
       <Box display="flex" justifyContent="space-between" alignItems="center" marginTop={2}>
         <Button onClick={handleRegister} color="primary">
