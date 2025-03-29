@@ -87,7 +87,7 @@ const Register: React.FC = () => {
       const requestData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        emailId: formData.emailId,
+        email: formData.emailId,
         password: formData.password,
         type: formData.type
       };
