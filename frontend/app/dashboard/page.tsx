@@ -1,18 +1,26 @@
 "use client";  // Ensure this file is client-side
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, IconButton, Menu, MenuItem, Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { useSearchParams, usePathname } from 'next/navigation';  // Use App Router hooks
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';  // Use App Router hooks
 import SideNav from './components/SideNav';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Import Profile Icon
 
 const DashboardPage = () => {
   const [isClient, setIsClient] = useState(false); // Track if we are on the client
+  const [bedData, setBedData] = useState<number | null>(null); // Store fetched bed data
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const router = useRouter();  // Router to navigate to login page
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   
   // Extract module from path or search params
   const moduleFromPath = pathname.split('/').pop();
   const moduleFromParams = searchParams.get('module');
   const [selectedModule, setSelectedModule] = useState<string>('dashboard');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For menu anchor element
 
   useEffect(() => {
     setIsClient(true);  // Set to true once the component is mounted
@@ -25,22 +33,63 @@ const DashboardPage = () => {
     }
   }, [moduleFromPath, moduleFromParams]);
 
-  const renderModuleContent = (module: string) => {
-    switch (module) {
-      case 'users':
-        return <Typography variant="body1">This is the Users section.</Typography>;
-      case 'bed':
-        return <Typography variant="body1">This is the Bed section.</Typography>;
-      case 'inventory':
-        return <Typography variant="body1">This is the Inventory section.</Typography>;
-      case 'notifications':
-        return <Typography variant="body1">This is the Notifications section.</Typography>;
-      case 'patients':
-        return <Typography variant="body1">This is the Patients section.</Typography>;
-      default:
-        return <Typography variant="body1">This is the Dashboard section.</Typography>;
-    }
+  useEffect(() => {
+    const fetchBedData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}api/beds`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch bed data");
+        }
+        
+        const data = await response.json();
+        console.log('data ' , data)
+        setBedData(data.length); // Assuming API returns { availableBeds: 120 }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBedData();
+  }, []);
+
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget); // Open the menu
   };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null); // Close the menu
+  };
+
+  const handleLogout = () => {
+    // Add logout logic here if required (e.g., clear local storage, session)
+    router.push('/login');  // Redirect to login page
+  };
+
+  // Function to render the cards
+  const renderDashboardContent = () => (
+    <Grid container spacing={3}>
+      <Grid item xs={12} sm={6} md={4}>
+        <Card>
+          <CardHeader title="Hospital Bed Availability" />
+          <CardContent>
+            <Typography variant="h6">Available Beds: {bedData}</Typography>
+            <Typography variant="body2">Check real-time bed availability for patients.</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={4}>
+        <Card>
+          <CardHeader title="Inventory" />
+          <CardContent>
+            <Typography variant="h6">Items in Stock: 80</Typography>
+            <Typography variant="body2">Check the status of available inventory items.</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
+  );
 
   if (!isClient) {
     return null;  // Return null during SSR to avoid trying to use router before client-side
@@ -60,7 +109,27 @@ const DashboardPage = () => {
         <Typography variant="h4">
           {selectedModule.charAt(0).toUpperCase() + selectedModule.slice(1)}
         </Typography>
-        {renderModuleContent(selectedModule)}
+        {selectedModule === 'dashboard' && renderDashboardContent()}
+
+        {/* Profile Image Icon with Dropdown Menu */}
+        <Box
+          position="absolute"
+          top={16}
+          right={16}
+          zIndex={10}
+        >
+          <IconButton onClick={handleProfileClick}>
+            <AccountCircleIcon fontSize="large" />
+          </IconButton>
+          
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleCloseMenu}
+          >
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
+        </Box>
       </Box>
     </Box>
   );
