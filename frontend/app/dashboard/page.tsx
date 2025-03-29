@@ -7,9 +7,14 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Import Pro
 
 const DashboardPage = () => {
   const [isClient, setIsClient] = useState(false); // Track if we are on the client
+  const [bedData, setBedData] = useState<number | null>(null); // Store fetched bed data
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();  // Router to navigate to login page
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   
   // Extract module from path or search params
   const moduleFromPath = pathname.split('/').pop();
@@ -27,6 +32,27 @@ const DashboardPage = () => {
       setSelectedModule(moduleFromParams);
     }
   }, [moduleFromPath, moduleFromParams]);
+
+  useEffect(() => {
+    const fetchBedData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}api/beds`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch bed data");
+        }
+        
+        const data = await response.json();
+        console.log('data ' , data)
+        setBedData(data.length); // Assuming API returns { availableBeds: 120 }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBedData();
+  }, []);
 
   const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget); // Open the menu
@@ -48,7 +74,7 @@ const DashboardPage = () => {
         <Card>
           <CardHeader title="Hospital Bed Availability" />
           <CardContent>
-            <Typography variant="h6">Available Beds: 120</Typography>
+            <Typography variant="h6">Available Beds: {bedData}</Typography>
             <Typography variant="body2">Check real-time bed availability for patients.</Typography>
           </CardContent>
         </Card>
