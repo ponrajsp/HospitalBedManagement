@@ -1,0 +1,47 @@
+name: CI/CD for Next.js with Vercel
+
+on:
+  push:
+    branches:
+      - production
+  pull_request:
+    branches:
+      - production
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code from GitHub repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.20.8'  # Replace with the Node version you're using
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Run tests (Optional, if you have tests set up)
+      # - name: Run tests
+      #   run: npm run test  # Adjust based on your test setup
+
+      # Build the Next.js application
+      - name: Build Next.js app
+        run: npm run build
+
+      # Deploy to Vercel using Vercel CLI
+      - name: Deploy to Vercel
+        run: |
+          curl -fsSL https://vercel.com/download -o vercel-linux
+          chmod +x vercel-linux
+          mv vercel-linux /usr/local/bin/vercel
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --confirm --cwd ./  # Deploy to production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
