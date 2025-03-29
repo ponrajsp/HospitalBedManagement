@@ -45,7 +45,7 @@ const LoginPage = () => {
     if (!isFormValid) return; // Stop if form is invalid
 
     try {
-      const response = await fetch(`${apiUrl}/auth/login`, {
+      const response = await fetch(`${apiUrl}api/userLogin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
