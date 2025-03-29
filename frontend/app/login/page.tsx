@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, TextField, Box, Typography } from '@mui/material';
+import { Button, TextField, Box, Typography, Container, Paper } from '@mui/material';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -73,62 +73,100 @@ const LoginPage = () => {
   };
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      width={400}
-      margin="auto"
-      gap={2}
-      padding={3}
-      border="1px solid #ddd"
-      borderRadius={2}
+    <Container 
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        padding: 2
+      }}
+      maxWidth="sm"
     >
-      <Typography variant="h5" align="center">Login</Typography>
-
-      {/* Form Element */}
-      <form onSubmit={handleSubmit} noValidate>
-        <TextField
-          label="Email"
-          type="email"
-          fullWidth
-          value={email}
-          onChange={handleEmailChange}
-          error={!isEmailValid && email.length > 0}
-          helperText={!isEmailValid && email.length > 0 ? 'Enter a valid email' : ''}
-          variant="outlined"
-          required
-        />
-
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          value={password}
-          onChange={handlePasswordChange}
-          error={!isPasswordValid && password.length > 0}
-          helperText={!isPasswordValid && password.length > 0 ? 'Password must be at least 6 characters' : ''}
-          variant="outlined"
-          required
-        />
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          disabled={!isFormValid}
-          sx={{ mt: 2 }}
+      <Paper
+        elevation={3}
+        sx={{
+          width: '100%',
+          maxWidth: 450,
+          padding: 4,
+          borderRadius: 2
+        }}
+      >
+        <Typography 
+          variant="h4" 
+          align="center" 
+          gutterBottom
+          sx={{ 
+            fontWeight: 'bold',
+            mb: 3
+          }}
         >
           Login
-        </Button>
-      </form>
+        </Typography>
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginTop={2}>
-        <Button onClick={handleRegister} color="primary">
-          New User? Register
-        </Button>
-      </Box>
-    </Box>
+        {/* Form Element */}
+        <form onSubmit={handleSubmit} noValidate>
+          <TextField
+            label="Email"
+            type="email"
+            fullWidth
+            value={email}
+            onChange={handleEmailChange}
+            error={!isEmailValid && email.length > 0}
+            helperText={!isEmailValid && email.length > 0 ? 'Enter a valid email' : ''}
+            variant="outlined"
+            required
+            margin="normal"
+            sx={{ mb: 2 }}
+          />
+
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            value={password}
+            onChange={handlePasswordChange}
+            error={!isPasswordValid && password.length > 0}
+            helperText={!isPasswordValid && password.length > 0 ? 'Password must be at least 6 characters' : ''}
+            variant="outlined"
+            required
+            margin="normal"
+            sx={{ mb: 4 }}
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={!isFormValid}
+            sx={{ 
+              mt: 2, 
+              py: 1.5,
+              fontSize: '1rem',
+              textTransform: 'none'
+            }}
+          >
+            Login
+          </Button>
+        </form>
+
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="center" 
+          marginTop={4}
+        >
+          <Button 
+            onClick={handleRegister} 
+            color="primary"
+            sx={{ textTransform: 'none' }}
+          >
+            New User? Register
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 
